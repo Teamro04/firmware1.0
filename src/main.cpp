@@ -9,13 +9,10 @@
 L298N motor1(ena,in1,in2);
 L298N motor2(enb,in3,in4);
 void setup(){
-    pinMode(LED_BUILTIN,OUTPUT);
+    
 }
 void loop(){
-    digitalWrite(LED_BUILTIN,HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN,LOW);
-    delay(100);
+
 }
 
 // Mechanics

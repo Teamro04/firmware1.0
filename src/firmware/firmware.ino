@@ -1,29 +1,49 @@
-#define IR1 
-#define IR2
-#define IR3
-#define ena
-#define enb
-#define in1
-#define in2
-#define in3
-#define in4
-#define ultrasonic1
-#define ultrasonic2
-#define ultrasonic3
+#define IR1 12
+#define IR2 11
+#define IR3 10
+#define ena 9 
+#define enb 8
+#define in1 7 
+#define in2 23
+#define in3 24
+#define in4 25
+#define ultrasonic1_echo 26 // To be installed in the front
+#define ultrasonic1_trigger 27 
 
+#define ultrasonic2_echo 28 // To be installed on the right side
+#define ultrasonnic2_trigger 29
+
+#define ultrasonic3_echo 30 // To be installed on the left side
+#define ultrasonic3_trigger 31
+
+// Array to hold all the pins up there
+uint8_t pins[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4};
 void setup(){
 
 };
 void loop(){
-
+  /*
+    TODO: 
+    Maze solving
+    Obstacle Avoidance 
+    Pause and Resume
+  */
+  float front_distance = distance(ultrasonic1_echo,ultrasonic1_trigger);
+  float right_distance = distance(ultrasonic2_echo,ultrasonic2_trigger);
+  float left_distance = distance(ultrasonic3_echo,ultrasonic3_trigger);
+  
+  do{
+    forward( float speed);
+  }while();
 };
 
-void motor_on(int enablePin){
+
+void motor_on(uint8_t enablePin){
   // Full speed
   digitalWrite(enablePin,HIGH);
 };
 
-void motor_off(int enablePin){
+void motor_off(uint8_t enablePin){
   //Turn off motor
   digitalWrite(enablePin,LOW);
 };
@@ -38,31 +58,42 @@ void robot_off(){
   motor_off(enb);
 }
 
-void forward(enablePin,speed){
+void forward(float speed){
   // Speed in percentage [0->100]
   float value = map(speed,0,100,0,255);
-  analogWrite(enablePin,value);
+  analogWrite(ena,value);
+  analogWrite(enb,value);
 
   // Mechanics   
   digitalWrite(in1,HIGH);
   digitalWrite(in2,LOW);
+
+  digitalWrite(in3,HIGH);
+  digitalWrite(in4,LOW);
+  
   
 };
 
-void backward(enablePin,speed){
+void backward(float speed){
   // Speed in percentage [0->100]
   float value = map(speed,0,100,0,255);
-  analogWrite(enablePin,value);
-
+  analogWrite(ena,value);
+  analogWrite(enb,value);
   // Mechanics   
   digitalWrite(in1,LOW);
   digitalWrite(in2,HIGH);
+
+  digitalWrite(in3,LOW);
+  digitalWrite(in4,HIGH);
   
 };
 
-void right(enablePin,int speed){
+void right(float speed){
   float value = map(speed,0,100,0,255);
-  analogWrite(enablePin,value);
+
+  analogWrite(ena,value);
+  analogWrite(enb,value);
+
   //Differential steering
   digitalWrite(in1,LOW); // First motor back
   digitalWrite(in2,HIGH);
@@ -71,35 +102,40 @@ void right(enablePin,int speed){
   digitalWrite(in4,LOW);
 };
 
-void left(int speed){
-  void right(enablePin,int speed){
+void left(float speed){
   float value = map(speed,0,100,0,255);
-  analogWrite(enablePin,value);
+  analogWrite(ena,value);
+  analogWrite(enb,value);
+
   //Differential steering
-  digitalWrite(in1,HIGH); // First motor back
+  digitalWrite(in1,HIGH); // First motor front
   digitalWrite(in2,LOW);
 
-  digitalWrite(in3,LOW); // Second Motor Front
+  digitalWrite(in3,LOW); // Second Motor back
   digitalWrite(in4,HIGH);
 };
 
-void U_turn_Right(int speed){
+void U_turn_Right(uint8_t speed){
   float value = map(speed,0,100,0,255);
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
-  motor_off(in1);
-  motor_off(in2);
-  backward(75);
+  motor_off(ena);
+
+  digitalWrite(in3,LOW); // Left Motor back
+  digitalWrite(in4,HIGH);  
+  
 };
 
-void U_turn_Left(int speed){
+void U_turn_Left(float speed){
   float value = map(speed,0,100,0,255);
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
   motor_off(in3);
   motor_off(in4);
-  backward(75);
+
+  digitalWrite(in1,LOW); // Second Motor back
+  digitalWrite(in2,HIGH);
 };
 // Read distance from ultrasonic sensor 
-float distance(int echo,int trigger){
+float distance(uint8_t echo,uint8_t trigger){
 
   digitalWrite(trigger,LOW);
   delayMicroseconds(10);
@@ -112,4 +148,24 @@ float distance(int echo,int trigger){
   return distance;
 };
 
+void isOff(uint8_t pin){
+  if(digitalRead(pin)==LOW){
+    return true;
+  }else{
+    return false;
+  }
+};
 
+void isOn(uint8_t pin){
+  if(digitalRead(pin)==HIGH){
+    return true;
+  }else{
+    return false;
+  }
+};
+
+void PauseAndResume(){
+  robot_off();
+  delay(3000);
+  robot_on();
+};
