@@ -27,14 +27,31 @@
 #define limit_fr 5 // Distance limit for the front ultrasonic sensor 
 #define limit_sd 2 // Distance limit for the right and left ultrasonic sensors
 
-float front_distance;
-float left_distance;
-float right_distance;
+#define front_distance distance(ultrasonic1_echo,ultrasonic1_trigger)
+#define left_distance distance(ultrasonic2_echo,ultrasonic2_trigger)
+#define right_distance distance(ultrasonic3_echo,ultrasonic3_trigger)
 
 // Arrays to hold all the pins 
 uint8_t outputs[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4,ultrasonic1_trigger,ultrasonic2_trigger,ultrasonic3_trigger}; // Output pins
 uint8_t inputs[] = {ultrasonic1_echo,ultrasonic2_echo,ultrasonic3_echo}; // Input pins
 
+// Function prototypes
+float distance(uint8_t echo,uint8_t trigger);
+void motor_on(uint8_t enablePin);
+void motor_off(uint8_t enablePin);
+bool isOn(uint8_t enablePin);
+bool isOff(uint8_t enablePin);
+void forward(float speed);
+void backward(float speed);
+void right(float speed);
+void left(float speed);
+void robot_off();
+void robot_on();
+void UTurn_Right(float speed);
+void UTurn_Left(float speed);
+void PauseAndResume();
+void followLine();
+void brake();
 
 void setup()
 {
@@ -48,10 +65,10 @@ void setup()
   }
 }
 
+
 void loop(){
-    front_distance = distance(ultrasonic1_echo,ultrasonic1_trigger); // Distance read by the front ultrasonic sensor
-    right_distance = distance(ultrasonic2_echo,ultrasonic2_trigger); // Distance read by the right ultrasonic sensor
-    left_distance  = distance(ultrasonic3_echo,ultrasonic3_trigger); // Distance read by the left ultrasonic sensor
+
+
 
   /*
     TODO: 
@@ -104,11 +121,11 @@ void loop(){
       */
 
       if
-      ((right_distance == < limit_sd))
+      (right_distance == limit_sd)
       {
         do{ 
           left(25);
-        }while(right_distance !== left_distance);
+        }while(right_distance != left_distance);
       }
 
       if
@@ -116,13 +133,15 @@ void loop(){
       {
         do{ 
           right(25);
-        }while(right_distance !== left_distance); 
+        }while(right_distance != left_distance); 
       }
 
-  }else{
+  }}
+
+  else{
 
     if(isOff(ena)){
-      motor_on(ena);
+      motor_on(ena);  
     }
 
     if(isOff(enb)){
@@ -210,7 +229,7 @@ void left(float speed){
   digitalWrite(in4,HIGH);
 }
 
-void U_turn_Right(uint8_t speed){
+void UTurn_Right(float speed){
   float value = map(speed,0,100,0,255);
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
   motor_off(ena);
@@ -220,7 +239,7 @@ void U_turn_Right(uint8_t speed){
   
 }
 
-void U_turn_Left(float speed){
+void UTurn_Left(float speed){
   float value = map(speed,0,100,0,255);
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
   motor_off(in3);
