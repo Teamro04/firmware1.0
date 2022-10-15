@@ -2,16 +2,16 @@
 
 #define IR1 12 // Right IR sensor
 #define IR2 11 // Left IR sensor
-#define IR3 10 // Middle IR sensor , (May not be installed)
+#define IR3 2 // Middle IR sensor , (May not be installed)
 
-#define ena 9  // Enable pin for the right motor pair
+#define ena 13  // Enable pin for the right motor pair
 #define enb 8 // Enable pin for the left motor pair
 
 #define in1 7 // Input 1 for the right motor
 #define in2 23 // Input 2 for the right motor
 
-#define in3 24 // Input 1 for the left motor 
-#define in4 25 // Input 2 for the left motor
+#define in3 10 // Input 1 for the left motor 
+#define in4 9 // Input 2 for the left motor
 
 #define ultrasonic1_echo 26 // To be installed in the front
 #define ultrasonic1_trigger 27 
@@ -295,9 +295,9 @@ void followLine(){
   int ir2 = digitalRead(IR2); // Left IR sensor
   if(ir1 ==0 && ir2 == 0){
     forward(75);
-    if(front_distance) 
-    {
-    
+    if(front_distance == limit_fr) 
+    { 
+      
     }
   }
   else if(ir1 == 1 && ir2 == 0){
