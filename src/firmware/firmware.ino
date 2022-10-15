@@ -1,12 +1,18 @@
-#define IR1 12
-#define IR2 11
-#define IR3 10
-#define ena 9 
-#define enb 8
-#define in1 7 
-#define in2 23
-#define in3 24
-#define in4 25
+/* INTELLIGENT ROBOT CHALLENGE */
+
+#define IR1 12 // Right IR sensor
+#define IR2 11 // Left IR sensor
+#define IR3 10 // Middle IR sensor , (May not be installed)
+
+#define ena 9  // Enable pin for the right motor pair
+#define enb 8 // Enable pin for the left motor pair
+
+#define in1 7 // Input 1 for the right motor
+#define in2 23 // Input 2 for the right motor
+
+#define in3 24 // Input 1 for the left motor 
+#define in4 25 // Input 2 for the left motor
+
 #define ultrasonic1_echo 26 // To be installed in the front
 #define ultrasonic1_trigger 27 
 
@@ -16,53 +22,88 @@
 #define ultrasonic3_echo 30 // To be installed on the left side
 #define ultrasonic3_trigger 31
 
-// Array to hold all the pins up there
+#define motorspeed  75 // Default motor speed in percentage
+
+
+
+#define limit_fr 5 // Distance limit for the front ultrasonic sensor 
+#define limit_sd 2 // Distance limit for the right and left ultrasonic sensors
+
+// Arrays to hold all the pins 
 uint8_t outputs[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4,ultrasonic1_trigger,ultrasonic2_trigger,ultrasonic3_trigger}; // Output pins
+
 uint8_t inputs[] = {ultrasonic1_echo,ultrasonic2_echo,ultrasonic3_echo}; // Input pins
-void setup(){
-  for(int pin = 0; pin<12; pin++){
+
+void setup(void)
+{
+  for(int pin = 0; pin<12; pin++) // Output pin array
+  { 
     pinMode(outputs[pin],OUTPUT);
   }
-  for(int i = 0; i<3; i++){
+  for(int i = 0; i<3; i++) // Input pin array
+  { 
     pinMode(inputs[i],INPUT);
   }
 };
-void loop(){
+
+void loop(void)
+{
+    #define front_distance distance(ultrasonic1_echo,ultrasonic1_trigger) // Distance read by the front ultrasonic sensor
+    #define right_distance distance(ultrasonic2_echo,ultrasonic2_trigger) // Distance read by the right ultrasonic sensor
+    #define left_distance  distance(ultrasonic3_echo,ultrasonic3_trigger) // Distance read by the left ultrasonic sensor
+
   /*
     TODO: 
     Maze solving
     Obstacle Avoidance 
     Pause and Resume
   */
-  float front_distance = distance(ultrasonic1_echo,ultrasonic1_trigger);
-  float right_distance = distance(ultrasonic2_echo,ultrasonic2_trigger);
-  float left_distance = distance(ultrasonic3_echo,ultrasonic3_trigger);
-  float speed = 50;
-  do{
-    forward(90);
-  }while(front_distance > 3);
-  
-  if(front_distance < 3){
 
-    if(right_distance <5){
+    // Ensure that the motors are on before starting the challenge 
+  if(isOn(ena) && isOn(enb)){
+    if(front_distance > limit_fr){ // Move forwards by default
+      forward(motorspeed);      
+    }else{ 
+      // CASE 1: Corner situation 
 
-      left(50);
-      delay(1000);
-
-      do{
-        forward(90);
-      }while(front_distance > 3);
-
+      /*
+        Front distance would be:
+          1 Something slightly above the set limit distance from the wall 
+          2 At the set limit distance from the wall       
+          3 Something slightly below the distance
+      */
+      /*
+        Side distances would be:
+        1 At a distance equal to the limit 
+        2 At a distance lower than the limit
+        3 At a distance higher than the limit
+      */
+      if((front_distance == limit_fr) || (front_distance-limit_fr <2) || (limit_fr-front_distance <2) ) // Check the three test cases above
+      {
+        // Proceed to check the right and left 
+        if(right_distance > left_distance){
+          right(motorspeed); // Turn right
+        }
+        else
+         if(left_distance >right_distance)
+        { 
+          left(motorspeed); // Turn left
+        }
+      }
+      
+      // Middle Align inside maze 
+      /*
+        Check if the distance between the left and right sensors is less than y:
+        y = (width of maze-width of robot)
+      */
     }
-    else if(left_distance < 5){
 
-      right(50);
-      delay(1000);
-
-      do{
-        forward(90);
-      }while(front_distance > 3);
-    
+  }else{
+    if(isOff(ena)){
+      motor_on(ena);
+    }
+    if(isOff(enb)){
+      motor_on(enb);
     }
   }
 };
@@ -178,7 +219,7 @@ float distance(uint8_t echo,uint8_t trigger){
   return distance;
 };
 
-void isOff(uint8_t pin){
+bool isOff(uint8_t pin){
   if(digitalRead(pin)==LOW){
     return true;
   }else{
@@ -186,7 +227,7 @@ void isOff(uint8_t pin){
   }
 };
 
-void isOn(uint8_t pin){
+bool isOn(uint8_t pin){
   if(digitalRead(pin)==HIGH){
     return true;
   }else{
@@ -199,3 +240,25 @@ void PauseAndResume(){
   delay(3000);
   robot_on();
 };
+void brake(){
+  digitalWrite(in1,LOW);
+  digitalWrite(in2,LOW);
+  digitalWrite(in3,LOW);
+  digitalWrite(in4,LOW);  
+}
+void followLine(){
+  int ir1 = digitalRead(IR1); // Right IR sensor
+  int ir2 = digitalRead(IR2); // Left IR sensor
+  if(ir1 ==0 && ir2 == 0){
+    forward(75);
+  }
+  else if(ir1 == 1 && ir2 == 0){
+    right(75);
+  }
+  else if(ir1 == 0 && ir2 == 1){
+    left(75);    
+  }
+  else if(ir1==1 && ir2==1){
+    PauseAndResume();
+  }
+}
