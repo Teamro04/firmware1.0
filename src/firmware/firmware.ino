@@ -27,9 +27,9 @@
 #define limit_fr 5 // Distance limit for the front ultrasonic sensor 
 #define limit_sd 2 // Distance limit for the right and left ultrasonic sensors
 
-#define front_distance distance(ultrasonic1_echo,ultrasonic1_trigger)
-#define left_distance distance(ultrasonic2_echo,ultrasonic2_trigger)
-#define right_distance distance(ultrasonic3_echo,ultrasonic3_trigger)
+#define front_distance  distance(ultrasonic1_echo,ultrasonic1_trigger) // Front ultrasonic sensor
+#define left_distance   distance(ultrasonic2_echo,ultrasonic2_trigger) // Left ultrasonic sensor
+#define right_distance  distance(ultrasonic3_echo,ultrasonic3_trigger) // Right ultrasonic sensor
 
 // Arrays to hold all the pins 
 uint8_t outputs[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4,ultrasonic1_trigger,ultrasonic2_trigger,ultrasonic3_trigger}; // Output pins
@@ -295,7 +295,10 @@ void followLine(){
   int ir2 = digitalRead(IR2); // Left IR sensor
   if(ir1 ==0 && ir2 == 0){
     forward(75);
+    if(front_distance) 
+    {
     
+    }
   }
   else if(ir1 == 1 && ir2 == 0){
     right(75);
