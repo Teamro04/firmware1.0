@@ -48,9 +48,9 @@ void setup(void)
 
 void loop(void)
 {
-    float front_distance distance(ultrasonic1_echo,ultrasonic1_trigger); // Distance read by the front ultrasonic sensor
-    float right_distance distance(ultrasonic2_echo,ultrasonic2_trigger); // Distance read by the right ultrasonic sensor
-    float left_distance  distance(ultrasonic3_echo,ultrasonic3_trigger); // Distance read by the left ultrasonic sensor
+    float front_distance = distance(ultrasonic1_echo,ultrasonic1_trigger); // Distance read by the front ultrasonic sensor
+    float right_distance = distance(ultrasonic2_echo,ultrasonic2_trigger); // Distance read by the right ultrasonic sensor
+    float left_distance  = distance(ultrasonic3_echo,ultrasonic3_trigger); // Distance read by the left ultrasonic sensor
 
   /*
     TODO: 
