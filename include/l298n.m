@@ -2,6 +2,7 @@
 #define L298N_H
 #include <Arduino.h>
 
+
 class L298N{
     public:
         int enablePin;
