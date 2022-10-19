@@ -66,8 +66,8 @@ void PauseAndResume(); // Pause for 3 seconds
 void followLine(); // Line following functionality
 void brake(); // Brake the robot
 bool blackLineDetected(); // Return true if any of the IR sensors detects a black line so as to trigger the followLine() function
-void mazeSolve(float fr, float lf,float rg);
-float pid(double inp);
+void mazeSolve(float fr, float lf,float rg); // Solve Maze
+float pid(double inp); // Proportional Integral Derivative Controller
 void setup()
 {
   // Loop through the output pins array 
@@ -130,7 +130,7 @@ void loop(){
     }else{ 
       
       // CASE 1: Corner situation 
-      
+
       /*
         Front distance would be:
           1 Something slightly above the set limit distance from the wall 
