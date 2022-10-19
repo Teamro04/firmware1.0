@@ -3,8 +3,8 @@
 #define IR2 30 // Left IR sensor
 #define IR3 2 // Middle IR sensor , (May not be installed)
 
-#define ena 13  // Enable pin for the right motor pair
-#define enb 8 // Enable pin for the left motor pair
+#define ena A0  // Enable pin for the right motor pair
+#define enb A1 // Enable pin for the left motor pair
 
 #define in1 29 // Input 1 for the right motor
 #define in2 23 // Input 2 for the right motor
@@ -21,7 +21,10 @@
 #define ultrasonic3_echo 53 // To be installed on the left side
 #define ultrasonic3_trigger 52
 
-#define motorspeed  90 // Default motor speed in percentage %
+#define motorspeed 5 // Default motor speed
+
+#define rightMotorspeed  motorspeed - pid(motorspeed)
+#define leftMotorSpeed  motorspeed - pid(motorspeed)
 
 #define limit_fr 5 // Distance limit for the front ultrasonic sensor 
 #define limit_sd 5 // Distance limit for the right and left ultrasonic sensors
@@ -49,25 +52,6 @@ double last_error;
 double input,output,set_point;
 double cumulative_error,rate_error;
 
-double distance(uint8_t echo,uint8_t trigger); // Function to read distance from ultrasonic sensors
-void motor_on(uint8_t enablePin); // Turn a specific motor on
-void motor_off(uint8_t enablePin); // Turn a specific motor off
-bool isOn(uint8_t enablePin); // Check if a pin is on
-bool isOff(uint8_t enablePin); // Check if a pin is off
-void forward(float right_speed,float left_speed); // Move forward
-void backward(float right_speed,float left_speed); // Move backwards
-void right(float right_speed,float left_speed); // Move right using differential thrust method
-void left(float right_speed,float left_speed); // Move left using differential thrust method
-void robot_off(); // Turn the motors off at once
-void robot_on(); // Turn the motors on at once
-void UTurn_Right(float speed); // Right U Turn
-void UTurn_Left(float speed); // Left U Turn 
-void PauseAndResume(); // Pause for 3 seconds
-void followLine(); // Line following functionality
-void brake(); // Brake the robot
-bool blackLineDetected(); // Return true if any of the IR sensors detects a black line so as to trigger the followLine() function
-void mazeSolve(float fr, float lf,float rg); // Solve Maze
-float pid(double inp); // Proportional Integral Derivative Controller
 void setup()
 {
   // Loop through the output pins array 
@@ -81,7 +65,8 @@ void setup()
     pinMode(inputs[i],INPUT); // Set pinmode to input
   }
 
-  robot_on(); // Turn the robot on
+  // start moving
+  forward(rightMotorspeed/1.5,leftMotorSpeed/1.5);
 }
 
 
@@ -96,7 +81,7 @@ void loop(){
   double fr = distance(ultrasonic1_echo,ultrasonic1_trigger);
   double rg = distance(ultrasonic2_echo,ultrasonic2_trigger);
   double lf = distance(ultrasonic3_echo,ultrasonic3_trigger);
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.print("Front ");
   Serial.println(fr);
   Serial.print("Right ");
@@ -110,9 +95,6 @@ void loop(){
   Serial.print("IR 2 ");
   Serial.println(ir2_val);
 
-  forward(85,85);   
-  delay(1000);
-  backward(85,85);
 
   if(blackLineDetected()){
     if(isOn(ena) && isOn(enb)){
@@ -126,7 +108,7 @@ void loop(){
   {
     
     if(front_distance > limit_fr){ // Move forwards by default
-      forward(75,75);      
+      forward(rightMotorspeed,leftMotorSpeed);      
     }else{ 
       
       // CASE 1: Corner situation 
@@ -149,13 +131,13 @@ void loop(){
       {
         // Proceed to check the right and left 
         if(right_distance > left_distance){
-          right(motorspeed,motorspeed); // Turn right
+          right(rightMotorspeed,leftMotorSpeed); // Turn right
         }
 
         else
          if(left_distance >right_distance)
         { 
-          left(motorspeed,motorspeed); // Turn left
+          left(rightMotorspeed,leftMotorSpeed); // Turn left
         }
         
       }
@@ -214,8 +196,8 @@ void robot_off(){
 // Move forward
 void forward(float right_speed,float left_speed){
   // Speed in percentage [0->100]
-  float rightSpeed = map(right_speed,0,100,0,255);
-  float leftSpeed = map(left_speed,0,100,0,255);  
+  float rightSpeed = right_speed;
+  float leftSpeed = left_speed;  
   digitalWrite(in1,HIGH);
   digitalWrite(in2,LOW);
 
@@ -230,8 +212,8 @@ void forward(float right_speed,float left_speed){
 // Move backwards
 void backward(float right_speed,float left_speed){
   // Speed in percentage [0->100]
-  float rightSpeed = map(right_speed,0,100,0,255);
-  float leftSpeed = map(left_speed,0,100,0,255);
+  float rightSpeed = right_speed;
+  float leftSpeed = left_speed;
 
   // Mechanics   
   digitalWrite(in1,LOW);
@@ -246,8 +228,8 @@ void backward(float right_speed,float left_speed){
 
 // Move right
 void right(float right_speed,float left_speed){
-  float rightSpeed = map(right_speed,0,100,0,255);
-  float leftSpeed = map(left_speed,0,100,0,255);
+  float rightSpeed = right_speed;
+  float leftSpeed = left_speed;
 
   digitalWrite(in1,LOW); // First motor back
   digitalWrite(in2,HIGH);
@@ -261,8 +243,8 @@ void right(float right_speed,float left_speed){
 }
 // Move left
 void left(float right_speed,float left_speed){
-  float rightSpeed = map(right_speed,0,100,0,255);
-  float leftSpeed = map(left_speed,0,100,0,255);
+  float rightSpeed = right_speed;
+  float leftSpeed = left_speed;
 
   digitalWrite(in1,HIGH); // First motor front
   digitalWrite(in2,LOW);
@@ -276,7 +258,7 @@ void left(float right_speed,float left_speed){
 }
 //  U turn Right
 void UTurn_Right(float speed){
-  float rightSpeed = map(speed,0,100,0,255);
+  float rightSpeed = speed;
 
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
   motor_off(ena);
@@ -288,7 +270,7 @@ void UTurn_Right(float speed){
 }
 //  U turn left
 void UTurn_Left(float speed){
-  float value = map(speed,0,100,0,255);
+  float value = speed;
   // Assuming that in1 and in2 are the right motors and in3 and in4 being left motors
   motor_off(enb);
   digitalWrite(in1,LOW); // Second Motor back
@@ -298,12 +280,16 @@ void UTurn_Left(float speed){
   
 }
 // Read distance from ultrasonic sensor 
-double distance(uint8_t echo,uint8_t trigger){
+ double distance(uint8_t echo,uint8_t trigger){
+
   digitalWrite(trigger,LOW);
-  delayMicroseconds(2);
+  delayMicroseconds(15);
+
   digitalWrite(trigger,HIGH);
+
   long dr = pulseIn(echo,HIGH);
-  long distance = dr*0.034/2;
+  double distance = dr*0.034/2;
+
   return distance;
 }
 // Check if a pin is off
@@ -326,7 +312,12 @@ bool isOn(uint8_t pin){
 void PauseAndResume(){
   robot_off();
   delay(3000);
-  robot_on();
+  // Take a U turn
+  UTurn_Left(leftMotorSpeed);
+  // delay for 1.5 s
+  delay(1500);
+  brake();
+  
 }
 // Brake the wheels
 void brake(){
@@ -341,38 +332,38 @@ void followLine(){
   int ir2 = digitalRead(IR2); // Left IR sensor
   // If no line detected, Move forward  
   if(ir1 ==1 && ir2 == 1){
-    forward(75,75);
+    forward(rightMotorspeed,leftMotorSpeed);
     if(front_distance == limit_fr) 
     { 
      // Obstacle detected while following a line 
       if(right_distance > left_distance){
         // Turn right 
-        right(25,25);
+        right(rightMotorspeed,leftMotorSpeed);
         delay(500);
-        left(50,50);
+        left(rightMotorspeed,leftMotorSpeed);
         delay(500);
         // Continue moving forward
-        forward(75,75);
+        forward(rightMotorspeed,leftMotorSpeed);
       }
       else if(left_distance>right_distance){
-        left(25,25);
+        left(rightMotorspeed,leftMotorSpeed);
         delay(500);
-        right(50,50);
+        right(rightMotorspeed,leftMotorSpeed);
         delay(500);
         // Continue moving forward
-        forward(75,75);              
+        forward(rightMotorspeed,leftMotorSpeed);              
       }
     }
   }
   // If right IR detects black line, turn right
   else if(ir1 == LOW && ir2 == HIGH){
-    right(75,75);
+    right(rightMotorspeed,leftMotorSpeed);
   }
   // If left IR detects black line turn left
   else if(ir1 == HIGH && ir2 == LOW){
-    left(75,75);    
+    left(rightMotorspeed,leftMotorSpeed);    
   }
-  // If both IR sensors are high, We've possibly reached the end of the maze
+  // If both IR sensors are low, We've possibly reached the end of the maze
   else if(ir1 == LOW && ir2 == LOW){
     PauseAndResume(); // Pause for 3 seconds
   }
@@ -392,9 +383,9 @@ void mazeSolve(float fr, float lf,float rg){
   if(fr>=limit_fr){
     // Check where there is more distance 
     if(rg>lf){
-      right(50,50);
+      right(rightMotorspeed,leftMotorSpeed);
     }else if(rg<lf){
-      left(50,50);      
+      left(rightMotorspeed,leftMotorSpeed);      
     }else{
       // Recursive function
       mazeSolve( fr,  lf,  rg);      
@@ -402,15 +393,15 @@ void mazeSolve(float fr, float lf,float rg){
   }
    if(fr<limit_fr){
     if(rg>lf){
-      right(50,50);
+      right(rightMotorspeed,leftMotorSpeed);
     }else if(rg<lf){
-      left(50,50);
+      left(rightMotorspeed,leftMotorSpeed);
     }else{
       mazeSolve(fr, lf, rg);
     }
   }
 }
-
+// Proportional integral derivative controller
 float pid(double inp){
   current_time = millis();
   elapsed_time = (double)(current_time-previous_time);
