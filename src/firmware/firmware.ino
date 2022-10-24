@@ -3,8 +3,8 @@
 #define IR2 30 // Left IR sensor
 #define IR3 2 // Middle IR sensor , (May not be installed)
 
-#define ena A0  // Enable pin for the right motor pair
-#define enb A1 // Enable pin for the left motor pair
+#define ena 6  // Enable pin for the right motor pair
+#define enb 7 // Enable pin for the left motor pair
 
 #define in1 29 // Input 1 for the right motor
 #define in2 23 // Input 2 for the right motor
@@ -21,7 +21,7 @@
 #define ultrasonic3_echo 53 // To be installed on the left side
 #define ultrasonic3_trigger 52
 
-#define motorspeed 5 // Default motor speed
+#define motorspeed 89 // Default motor speed
 
 #define rightMotorspeed  motorspeed - pid(motorspeed)
 #define leftMotorSpeed  motorspeed - pid(motorspeed)
