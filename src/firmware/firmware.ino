@@ -35,8 +35,6 @@
 
 // Arrays to hold all the pins 
 
-uint8_t outputs[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4,ultrasonic1_trigger,ultrasonic2_trigger,ultrasonic3_trigger}; // Output pins
-uint8_t inputs[] = {ultrasonic1_echo,ultrasonic2_echo,ultrasonic3_echo}; // Input pins
 
 // Position of the robot ( May not be necessary in the long run )
 #define position NULL
@@ -51,6 +49,9 @@ double error;
 double last_error;
 double input,output,set_point;
 double cumulative_error,rate_error;
+
+uint8_t outputs[] = {IR1,IR2,IR3,ena,enb,in1,in2,in3,in4,ultrasonic1_trigger,ultrasonic2_trigger,ultrasonic3_trigger}; // Output pins
+uint8_t inputs[] = {ultrasonic1_echo,ultrasonic2_echo,ultrasonic3_echo}; // Input pins
 
 void setup()
 {
