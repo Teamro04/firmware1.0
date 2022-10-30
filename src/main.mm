@@ -15,7 +15,7 @@ void loop(){
 
 }
 
-// Mechanics
+// 
 void forward(){
     motor1.forward(50);
     motor2.backward(50);
